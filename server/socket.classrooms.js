@@ -35,14 +35,22 @@ const createClassRoom = (
 };
 
 const addStudentToClass = (roomId, socketId, studentName, password) => {
-	roomId = roomId.trim().toLowerCase();
-	studentName = studentName.trim().toLowerCase();
-	password = password.trim().toLowerCase();
+	console.log("Joining student info", roomId, studentName, socketId, password);
 
 	if (
-		!classrooms.hasOwnProperty(roomId.toString()) ||
+		!classrooms.hasOwnProperty(String(roomId)) ||
 		classrooms[roomId].password != password
 	) {
+		console.log("SERVER: error");
+		console.log(
+			"ERROR: classroom has property",
+			classrooms.hasOwnProperty(roomId.toString())
+		);
+		console.log(
+			"ERROR: required and entered password",
+			classrooms[roomId].password,
+			password
+		);
 		return { error: "Room does not exist or wrong password" };
 	}
 

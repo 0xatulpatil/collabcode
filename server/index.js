@@ -30,7 +30,7 @@ io.on("connection", (socket) => {
 	console.log("user connection", count++);
 	socket.on("disconnect", () => {
 		console.log("rooms part of", socket.rooms);
-		console.log("Client disconnected", count++);
+		console.log("Client disconnected", count--);
 	});
 
 	socket.on("message", (message) => {
@@ -54,6 +54,7 @@ io.on("connection", (socket) => {
 	);
 
 	socket.on("joinClassroom", ({ roomId, studentName, password }) => {
+		console.log("SERVER: Some one is joining the class");
 		addStudentToClass(roomId, socket.id, studentName, password);
 		socket.broadcast
 			.to(roomId)

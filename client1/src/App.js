@@ -65,29 +65,7 @@ function App() {
 		};
 	}, []);
 
-	return (
-		<div>
-			<button
-				onClick={() =>
-					createClassRoom(roomId, className, teacherName, password)
-				}
-			>
-				Create Classroom
-			</button>
-
-			<input onChange={(e) => setRoomId(e.target.value)} type="text"></input>
-			<br></br>
-			<button
-				onClick={() => {
-					joinClass(classCode, "student1", "atul");
-				}}
-			>
-				Join Classroom with Code
-			</button>
-			<input onChange={(e) => setClassCode(e.target.value)} type="text"></input>
-			<button onClick={() => onDisconnect()}>Disconnect</button>
-		</div>
-	);
+	return <div>Hello</div>;
 }
 
 export default App;
