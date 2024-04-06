@@ -37,10 +37,10 @@ export const JoinClass = () => {
 			alert("some fields are empty");
 			return;
 		}
-
-		createClassRoom(uuid4(), classname, teachername, password);
+		let classCode = uuid4();
+		createClassRoom(classCode, classname, teachername, password);
 		console.log("Created class", classname, password, teachername);
-		navigate("/teacher");
+		navigate("/teacher/" + classCode);
 	};
 
 	return (

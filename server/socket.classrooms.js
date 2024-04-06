@@ -10,6 +10,16 @@ let classrooms = {
     }, */
 };
 
+let socketToRoomMap = new Map();
+
+const insertIntoMap = (socketId, roomId) => {
+	socketToRoomMap.set(socketId, roomId);
+};
+
+const deleteFromMap = (socketId, roomId) => {
+	socketToRoomMap.delete(socketId, roomId);
+};
+
 const createClassRoom = (
 	roomId,
 	socketId,
@@ -30,6 +40,7 @@ const createClassRoom = (
 	};
 
 	classrooms[roomId] = classroom;
+	insertIntoMap(socketId, roomId);
 	console.log("created classroom", classrooms);
 	return classrooms;
 };
@@ -38,19 +49,14 @@ const addStudentToClass = (roomId, socketId, studentName, password) => {
 	console.log("Joining student info", roomId, studentName, socketId, password);
 
 	if (
-		!classrooms.hasOwnProperty(String(roomId)) ||
+		// !classrooms.hasOwnProperty(roomId) ||
+		typeof classrooms[roomId] === "undefined" ||
 		classrooms[roomId].password != password
 	) {
-		console.log("SERVER: error");
-		console.log(
-			"ERROR: classroom has property",
-			classrooms.hasOwnProperty(roomId.toString())
-		);
-		console.log(
-			"ERROR: required and entered password",
-			classrooms[roomId].password,
-			password
-		);
+		console.log("SERVER: error, password or room");
+		console.log("err: classrooms:", classrooms);
+		console.log("ERROR: classroom has property", classrooms[roomId], roomId);
+
 		return { error: "Room does not exist or wrong password" };
 	}
 
@@ -69,13 +75,19 @@ const addStudentToClass = (roomId, socketId, studentName, password) => {
 	classrooms[roomId].students.push(student);
 
 	console.log(`joined classroom ${roomId}`);
+	insertIntoMap(socketId, roomId);
 	console.log("Student list:", classrooms[roomId].students);
 	return student;
 };
 
-const removePerson = (socketId, classroomId) => {
+const removePerson = (socketId) => {
 	console.log("server remove intiated");
-	if (!classrooms.hasOwnProperty(classroomId)) {
+	let classroomId = socketToRoomMap.get(socketId);
+
+	if (
+		typeof classroomId === "undefined" ||
+		!classrooms.hasOwnProperty(classroomId)
+	) {
 		console.log("Classroom does not exits", classroomId);
 		return { error: "Class does not exists" };
 	}
@@ -83,18 +95,32 @@ const removePerson = (socketId, classroomId) => {
 	if (classrooms[classroomId].teacherId === socketId) {
 		console.log("teacher itself exited");
 
+		deleteFromMap(socketId, classroomId);
+		//TODO: disconnect everyone from class if teacher exits
 		delete classrooms[classroomId];
-		return;
+		return { classroomId: classroomId };
 	}
 
 	let newArr = classrooms[classroomId].students.filter((elem) => {
 		return !(elem.socketId === socketId);
 	});
 
-	console.log("modified array", newArr);
+	deleteFromMap(socketId, classroomId);
+	console.log("Student list after student left", newArr);
 
 	classrooms[classroomId].students = newArr;
 	console.log("removed student", classrooms[classroomId].students);
+
+	return { socketId: socketId, classroomId: classroomId };
 };
 
-module.exports = { addStudentToClass, createClassRoom, removePerson };
+const studentList = (classCode) => {
+	return classrooms[classCode]?.students;
+};
+
+module.exports = {
+	addStudentToClass,
+	createClassRoom,
+	removePerson,
+	studentList,
+};

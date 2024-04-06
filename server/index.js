@@ -8,6 +8,7 @@ const {
 	createClassRoom,
 	addStudentToClass,
 	removePerson,
+	studentList,
 } = require("./socket.classrooms");
 
 const PORT = 5000;
@@ -28,14 +29,23 @@ console.log(uuidv4());
 
 io.on("connection", (socket) => {
 	console.log("user connection", count++);
+
 	socket.on("disconnect", () => {
-		console.log("rooms part of", socket.rooms);
-		console.log("Client disconnected", count--);
+		console.log("Socket connected to rooms", socket.rooms);
+		let stud = removePerson(socket.id);
+		let classCode = stud["classroomId"];
+
+		socket.broadcast
+			.to(classCode)
+			.emit("classNotif", `${socket.id} left the classroom`);
+		socket.broadcast
+			.to(classCode)
+			.emit("studentActivity", { id: socket.id, inClass: false });
 	});
 
 	socket.on("message", (message) => {
 		console.log("Message received:", message);
-		io.emit("message", message);
+		socket.emit("message", message);
 	});
 
 	socket.on(
@@ -48,18 +58,22 @@ io.on("connection", (socket) => {
 				teacherName,
 				password
 			);
-			if (error) console.log(error);
-			socket.join(roomId.toLowerCase());
+			if (error) {
+				console.log("Error while creating class", error);
+			} else socket.join(roomId);
 		}
 	);
 
 	socket.on("joinClassroom", ({ roomId, studentName, password }) => {
 		console.log("SERVER: Some one is joining the class");
-		addStudentToClass(roomId, socket.id, studentName, password);
+		let addedStud = addStudentToClass(roomId, socket.id, studentName, password);
 		socket.broadcast
 			.to(roomId)
 			.emit("classNotif", `${studentName} joined the classroom`);
 		socket.join(roomId);
+		socket.broadcast
+			.to(roomId)
+			.emit("studentActivity", { stud: addedStud, inClass: true });
 	});
 
 	socket.on("leaveClassroom", ({ classCode }) => {
@@ -67,6 +81,16 @@ io.on("connection", (socket) => {
 		socket.broadcast
 			.to(classCode)
 			.emit("classNotif", `${socket.id} left the classroom`);
+		socket.broadcast
+			.to(classCode)
+			.emit("studentActivity", { id: socket.id, inClass: false });
+	});
+
+	socket.on("getStudentList", ({ classCode }) => {
+		console.log("event received: getStudentList");
+		const studList = studentList(classCode);
+		console.log(studList);
+		socket.broadcast.to(classCode).emit("studentList", studList);
 	});
 });
 

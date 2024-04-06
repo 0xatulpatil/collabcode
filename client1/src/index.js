@@ -4,7 +4,7 @@ import "./index.css";
 import App from "./App";
 import { Navbar } from "./Components/Layout/Navbar/Navbar";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { Teacher } from "./Components/Layout/Teacher/Teacher";
+import { Teacher, loader } from "./Components/Layout/Teacher/Teacher";
 import { Student } from "./Components/Layout/Student/Student";
 import { JoinClass } from "./Components/JoinClass/JoinClass";
 
@@ -18,8 +18,9 @@ const router = createBrowserRouter([
 				element: <JoinClass />,
 			},
 			{
-				path: "/teacher",
+				path: "/teacher/:classCode",
 				element: <Teacher />,
+				loader: loader,
 			},
 			{
 				path: "/student",
