@@ -10,6 +10,7 @@ const {
 	removePerson,
 	studentList,
 	askForReview,
+	handleCodePush,
 } = require("./socket.classrooms");
 
 const PORT = 5000;
@@ -80,6 +81,11 @@ io.on("connection", (socket) => {
 	socket.on("reviewMe", (socketId) => {
 		console.log("reviewMe event received from", socketId);
 		askForReview(socketId, socket);
+	});
+
+	socket.on("teacherCode", (code) => {
+		console.log("received teachers code");
+		handleCodePush(code, socket);
 	});
 
 	socket.on("leaveClassroom", ({ classCode }) => {

@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { socket } from "../../../socket";
 import { useLoaderData } from "react-router-dom";
+import CodeMirror from "@uiw/react-codemirror";
+import { javascript } from "@codemirror/lang-javascript";
+import { vscodeDark } from "@uiw/codemirror-theme-vscode";
 
 export async function loader({ params }) {
 	const classCode = params.classCode;
@@ -10,6 +13,9 @@ export async function loader({ params }) {
 export const Teacher = () => {
 	const [studentMap, setStudentMap] = useState({});
 	const { classCode } = useLoaderData();
+
+	const [code, setCode] = useState("console.log('hello world!');");
+	const codemirrorRef = useRef();
 
 	const getStudentList = (classCode) => {
 		console.log("fetchign studentlist with code", classCode);
@@ -76,6 +82,10 @@ export const Teacher = () => {
 		});
 	};
 
+	const handleCodePush = () => {
+		socket.emit("teacherCode", code);
+	};
+
 	useEffect(() => {
 		socket.on("disconnect", () => {
 			console.log("something went wrong or you lost connection");
@@ -96,6 +106,11 @@ export const Teacher = () => {
 			socket.off("studentActivity");
 			socket.off("reviewMe");
 		};
+	}, []);
+
+	const onChange = React.useCallback((val, viewUpdate) => {
+		console.log("val:", val);
+		setCode(val);
 	}, []);
 
 	return (
@@ -121,8 +136,19 @@ export const Teacher = () => {
 					})}
 				</div>
 			</div>
-			<button onClick={sendMessage}>Send message</button>
-			<div className="w-full bg-blue-200">Text Editor</div>
+			<div className="w-full h-10">
+				<CodeMirror
+					value={code}
+					extensions={[javascript({ jsx: true })]}
+					onChange={onChange}
+					className="w-full bg-blue-200"
+					ref={codemirrorRef}
+					theme={vscodeDark}
+				/>
+				<button onClick={handleCodePush} className="bg-red-400">
+					Push Code
+				</button>
+			</div>
 		</div>
 	);
 };

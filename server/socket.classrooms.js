@@ -132,10 +132,17 @@ const askForReview = (socketId, socket) => {
 	socket.broadcast.to(classCode).emit("reviewMe", socketId);
 };
 
+const handleCodePush = (code, socket) => {
+	const classCode = socketToRoomMap.get(socket.id);
+	console.log("broadcasting teachers code");
+	socket.broadcast.to(classCode).emit("teacherCode", code);
+};
+
 module.exports = {
 	addStudentToClass,
 	createClassRoom,
 	removePerson,
 	studentList,
 	askForReview,
+	handleCodePush,
 };
