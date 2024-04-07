@@ -80,7 +80,7 @@ const addStudentToClass = (roomId, socketId, studentName, password) => {
 	return student;
 };
 
-const removePerson = (socketId) => {
+const removePerson = (socketId, io) => {
 	console.log("server remove intiated");
 	let classroomId = socketToRoomMap.get(socketId);
 
@@ -97,6 +97,14 @@ const removePerson = (socketId) => {
 
 		deleteFromMap(socketId, classroomId);
 		//TODO: disconnect everyone from class if teacher exits
+		/* let studentList = classrooms[socketId];
+
+		studentList.forEach((student) => {
+			const clientSocket = io.sockets.connected[student.socketId];
+			const s = io.sockets.sockets.get(s);
+			console.log("removing socet", s);
+			s.disconnect(true);
+		}); */
 		delete classrooms[classroomId];
 		return { classroomId: classroomId };
 	}
@@ -118,9 +126,16 @@ const studentList = (classCode) => {
 	return classrooms[classCode]?.students;
 };
 
+const askForReview = (socketId, socket) => {
+	let studentClass = socketToRoomMap.get(socketId);
+	const classCode = socketToRoomMap.get(socketId);
+	socket.broadcast.to(classCode).emit("reviewMe", socketId);
+};
+
 module.exports = {
 	addStudentToClass,
 	createClassRoom,
 	removePerson,
 	studentList,
+	askForReview,
 };

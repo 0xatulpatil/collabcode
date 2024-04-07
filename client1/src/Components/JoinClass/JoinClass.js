@@ -25,7 +25,7 @@ export const JoinClass = () => {
 		console.log("Joining initiated");
 		joinClass(classcode, studentname, classpassword);
 		console.log("Joined class", classcode, classpassword);
-		navigate("/student");
+		navigate("/student/" + classcode);
 	};
 
 	const handleCreateClass = () => {

@@ -35,13 +35,6 @@ export const Teacher = () => {
 	const handleStudentActivity = (stud) => {
 		console.log("Handling student activity:", stud);
 		if (stud.inClass) {
-			/* let prevMap = studentMap;
-			let addedStud = stud.stud;
-			addedStud["review"] = false;
-			prevMap[stud.stud.socketId] = addedStud;
-			console.log("setting student Map as student joined");
-			setStudentMap(prevMap); */
-
 			setStudentMap((studentMap) => {
 				let copiedMap = { ...studentMap };
 				stud.stud["review"] = false;
@@ -53,7 +46,6 @@ export const Teacher = () => {
 			setStudentMap((studentMap) => {
 				let copiedMap = { ...studentMap };
 				let socketId = stud.stud.socketId;
-				console.log("removing from list", socketId);
 				delete copiedMap[socketId];
 
 				return { ...copiedMap };
@@ -63,6 +55,25 @@ export const Teacher = () => {
 	const sendMessage = () => {
 		console.log("sending message");
 		socket.emit("message", "hello there");
+	};
+
+	const handleReview = (socketId) => {
+		console.log("wants to get reviewed", socketId);
+		setStudentMap((studentMap) => {
+			let tmap = { ...studentMap };
+			tmap[socketId].review = true;
+
+			return { ...tmap };
+		});
+	};
+
+	const handleStudentCard = (socketId) => {
+		setStudentMap((studentMap) => {
+			let tMap = { ...studentMap };
+			tMap[socketId].review = false;
+
+			return { ...tMap };
+		});
 	};
 
 	useEffect(() => {
@@ -77,10 +88,13 @@ export const Teacher = () => {
 		getStudentList(classCode);
 		socket.on("studentList", (list) => handleStudentList(list));
 		socket.on("studentActivity", (stud) => handleStudentActivity(stud));
+		socket.on("reviewMe", (socketId) => handleReview(socketId));
 
 		return () => {
 			socket.off("disconnect");
 			socket.off("studentList");
+			socket.off("studentActivity");
+			socket.off("reviewMe");
 		};
 	}, []);
 
@@ -91,8 +105,16 @@ export const Teacher = () => {
 				<div className="flex flex-col items-center justify-center ">
 					{Object.entries(studentMap).map(([key, student]) => {
 						return (
-							<div className="flex items-center justify-center w-full h-12 bg-gray-400 border-2">
-								<div className="w-2 h-2 mr-2 bg-red-600 rounded-full"></div>
+							<div
+								key={student.socketId}
+								className="flex items-center justify-center w-full h-12 bg-gray-400 border-2"
+								onClick={(e) => handleStudentCard(student.socketId)}
+							>
+								<div
+									className={`w-2 h-2 mr-2 bg-red-600 rounded-full ${
+										!student.review ? "hidden" : ""
+									}`}
+								></div>
 								<div>{student.name}</div>
 							</div>
 						);

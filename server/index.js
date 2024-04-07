@@ -9,6 +9,7 @@ const {
 	addStudentToClass,
 	removePerson,
 	studentList,
+	askForReview,
 } = require("./socket.classrooms");
 
 const PORT = 5000;
@@ -32,7 +33,7 @@ io.on("connection", (socket) => {
 
 	socket.on("disconnect", () => {
 		console.log("Socket connected to rooms", socket.rooms);
-		let stud = removePerson(socket.id);
+		let stud = removePerson(socket.id, io);
 		let classCode = stud["classroomId"];
 
 		socket.broadcast
@@ -74,6 +75,11 @@ io.on("connection", (socket) => {
 		socket.broadcast
 			.to(roomId)
 			.emit("studentActivity", { stud: addedStud, inClass: true });
+	});
+
+	socket.on("reviewMe", (socketId) => {
+		console.log("reviewMe event received from", socketId);
+		askForReview(socketId, socket);
 	});
 
 	socket.on("leaveClassroom", ({ classCode }) => {
