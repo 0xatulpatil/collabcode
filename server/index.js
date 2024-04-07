@@ -40,7 +40,7 @@ io.on("connection", (socket) => {
 			.emit("classNotif", `${socket.id} left the classroom`);
 		socket.broadcast
 			.to(classCode)
-			.emit("studentActivity", { id: socket.id, inClass: false });
+			.emit("studentActivity", { stud: stud, inClass: false });
 	});
 
 	socket.on("message", (message) => {

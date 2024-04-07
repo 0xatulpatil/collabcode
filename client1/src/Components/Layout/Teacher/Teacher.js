@@ -8,8 +8,7 @@ export async function loader({ params }) {
 }
 
 export const Teacher = () => {
-	const [studentList, setStudentList] = useState([]);
-	const [studentMap, setStudentMap] = useState(new Map());
+	const [studentMap, setStudentMap] = useState({});
 	const { classCode } = useLoaderData();
 
 	const getStudentList = (classCode) => {
@@ -21,34 +20,43 @@ export const Teacher = () => {
 
 	const handleStudentList = (studentList) => {
 		console.log("received student list", studentList);
-		let studentMap = new Map();
+		let studentMp = {};
 		console.log("handling list", studentList);
 
 		studentList.forEach((student) => {
 			student["review"] = false;
-			studentMap.set(student.socketId, student);
+			studentMp[student.socketId] = student;
 		});
 
-		setStudentMap(studentMap);
-		console.log(studentMap);
+		setStudentMap(studentMp);
+		console.log(studentMp);
 	};
 
 	const handleStudentActivity = (stud) => {
 		console.log("Handling student activity:", stud);
 		if (stud.inClass) {
-			setStudentMap((pMap) => {
-				let prevMap = pMap;
-				let addedStud = stud.stud;
-				addedStud["review"] = false;
-				prevMap.set(stud.stud.socketId, addedStud);
-				console.log("Map state", Array.from(studentMap.values()));
-				return prevMap;
+			/* let prevMap = studentMap;
+			let addedStud = stud.stud;
+			addedStud["review"] = false;
+			prevMap[stud.stud.socketId] = addedStud;
+			console.log("setting student Map as student joined");
+			setStudentMap(prevMap); */
+
+			setStudentMap((studentMap) => {
+				let copiedMap = { ...studentMap };
+				stud.stud["review"] = false;
+				copiedMap[stud.stud.socketId] = stud.stud;
+
+				return { ...copiedMap };
 			});
 		} else {
-			setStudentMap((pMap) => {
-				let prevMap = pMap;
-				prevMap.delete(stud.stud.socketId);
-				return prevMap;
+			setStudentMap((studentMap) => {
+				let copiedMap = { ...studentMap };
+				let socketId = stud.stud.socketId;
+				console.log("removing from list", socketId);
+				delete copiedMap[socketId];
+
+				return { ...copiedMap };
 			});
 		}
 	};
@@ -81,7 +89,7 @@ export const Teacher = () => {
 			<div className="w-1/5">
 				<h3 className="p-4 text-xl font-bold">Students List</h3>
 				<div className="flex flex-col items-center justify-center ">
-					{Array.from(studentMap.values()).map((student) => {
+					{Object.entries(studentMap).map(([key, student]) => {
 						return (
 							<div className="flex items-center justify-center w-full h-12 bg-gray-400 border-2">
 								<div className="w-2 h-2 mr-2 bg-red-600 rounded-full"></div>
