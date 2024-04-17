@@ -18,11 +18,13 @@ code {
 }
 
 .CodeMirror {
-  height: 100% !important
+  /* height: 100% !important */
 }
-
-.cm-editor {
-  height: 90% !important
+.cm-editor{
+  height: 100%;
+}
+.cm-theme {
+  height: 100% 
 }
 
 

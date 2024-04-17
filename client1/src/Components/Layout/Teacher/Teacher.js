@@ -15,6 +15,7 @@ export const Teacher = () => {
 	const { classCode } = useLoaderData();
 
 	const [code, setCode] = useState("console.log('hello world!');");
+	const [studentCode, setStudentCode] = useState("");
 	const codemirrorRef = useRef();
 
 	const getStudentList = (classCode) => {
@@ -136,15 +137,35 @@ export const Teacher = () => {
 					})}
 				</div>
 			</div>
-			<div className="w-full h-10">
-				<CodeMirror
-					value={code}
-					extensions={[javascript({ jsx: true })]}
-					onChange={onChange}
-					className="w-full bg-blue-200"
-					ref={codemirrorRef}
-					theme={vscodeDark}
-				/>
+			<div className="w-full h-full">
+				<div className="flex w-full">
+					<div className="flex flex-col w-full code-editor">
+						<div className="text-center text-white bg-gray-500">
+							Teacher's Editor
+						</div>
+						<CodeMirror
+							value={code}
+							extensions={[javascript({ jsx: true })]}
+							onChange={onChange}
+							className="w-full bg-blue-200"
+							ref={codemirrorRef}
+							theme={vscodeDark}
+						/>
+					</div>
+					<div className="flex flex-col w-full code-editor">
+						<div className="text-center text-white bg-gray-500">
+							Student's Editor
+						</div>
+						<CodeMirror
+							value={studentCode}
+							extensions={[javascript({ jsx: true })]}
+							onChange={onChange}
+							className="w-full bg-blue-200"
+							ref={codemirrorRef}
+							theme={vscodeDark}
+						/>
+					</div>
+				</div>
 				<button onClick={handleCodePush} className="bg-red-400">
 					Push Code
 				</button>
