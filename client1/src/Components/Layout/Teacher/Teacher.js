@@ -15,7 +15,7 @@ export const Teacher = () => {
 	const { classCode } = useLoaderData();
 
 	const [code, setCode] = useState("console.log('hello world!');");
-	const [studentCode, setStudentCode] = useState("");
+	const [studentCode, setStudentCode] = useState("hello there student");
 	const codemirrorRef = useRef();
 
 	const getStudentList = (classCode) => {
@@ -114,10 +114,14 @@ export const Teacher = () => {
 		setCode(val);
 	}, []);
 
+	const onChangeStudent = React.useCallback((val, viewUpdate) => {
+		setStudentCode(val);
+	}, []);
+
 	return (
 		<div className="flex h-full bg-red-50">
-			<div className="w-1/5">
-				<h3 className="p-4 text-xl font-bold">Students List</h3>
+			<div className="w-1/5 bg-gray-600">
+				<h3 className="p-4 text-xl font-bold bg-gray-700">Students List</h3>
 				<div className="flex flex-col items-center justify-center ">
 					{Object.entries(studentMap).map(([key, student]) => {
 						return (
@@ -138,10 +142,12 @@ export const Teacher = () => {
 				</div>
 			</div>
 			<div className="w-full h-full">
-				<div className="flex w-full">
-					<div className="flex flex-col w-full code-editor">
+				<div className="flex w-full border border-blue-950">
+					<div className="flex flex-col w-full border-r-2 border-orange-800 code-editor">
 						<div className="text-center text-white bg-gray-500">
-							Teacher's Editor
+							<div className="h-8 text-lg font-bold text-gray-900">
+								Teacher's Editor
+							</div>
 						</div>
 						<CodeMirror
 							value={code}
@@ -151,24 +157,42 @@ export const Teacher = () => {
 							ref={codemirrorRef}
 							theme={vscodeDark}
 						/>
+						<button onClick={handleCodePush} className="font-bold bg-gray-300">
+							Push Code
+						</button>
 					</div>
-					<div className="flex flex-col w-full code-editor">
-						<div className="text-center text-white bg-gray-500">
-							Student's Editor
+					{studentCode.length > 0 ? (
+						<div className="flex flex-col w-full code-editor">
+							<div className="flex justify-around text-center text-white bg-gray-500">
+								<div className="h-8 text-lg font-bold text-gray-900 ">
+									Student's Editor
+								</div>
+								<div
+									onClick={() => setStudentCode("")}
+									className="px-2 text-white bg-red-400 rounded-full cursor-pointer"
+								>
+									X
+								</div>
+							</div>
+							<CodeMirror
+								value={studentCode}
+								extensions={[javascript({ jsx: true })]}
+								onChange={onChangeStudent}
+								className="w-full bg-blue-200"
+								ref={codemirrorRef}
+								theme={vscodeDark}
+							/>
+							<button
+								onClick={handleCodePush}
+								className="font-bold bg-gray-300"
+							>
+								Push Code
+							</button>
 						</div>
-						<CodeMirror
-							value={studentCode}
-							extensions={[javascript({ jsx: true })]}
-							onChange={onChange}
-							className="w-full bg-blue-200"
-							ref={codemirrorRef}
-							theme={vscodeDark}
-						/>
-					</div>
+					) : (
+						<></>
+					)}
 				</div>
-				<button onClick={handleCodePush} className="bg-red-400">
-					Push Code
-				</button>
 			</div>
 		</div>
 	);

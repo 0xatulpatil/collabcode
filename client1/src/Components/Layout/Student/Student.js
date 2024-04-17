@@ -42,21 +42,35 @@ export const Student = () => {
 			<div className="">
 				<btn onClick={handleReviewClick}>Ask for Review</btn>
 			</div>
-			<div className="flex">
-				<CodeMirror
-					value={code}
-					extensions={[javascript({ jsx: true })]}
-					onChange={onChange}
-					className="w-full bg-blue-200"
-					theme={vscodeDark}
-				/>
-				<CodeMirror
-					value={tcode}
-					extensions={[javascript({ jsx: true })]}
-					className="w-full bg-blue-200"
-					theme={vscodeDark}
-					readOnly="nocursor"
-				/>
+			<div className="flex w-full border border-blue-950">
+				<div className="flex flex-col w-full border-r-2 border-orange-800 code-editor">
+					<div className="text-center text-white bg-gray-500">
+						<div className="h-8 text-lg font-bold text-gray-900">
+							Student's Editor
+						</div>
+					</div>
+					<CodeMirror
+						value={code}
+						extensions={[javascript({ jsx: true })]}
+						onChange={onChange}
+						className="w-full bg-blue-200"
+						theme={vscodeDark}
+					/>
+				</div>
+				<div className="flex flex-col w-full code-editor">
+					<div className="flex justify-around text-center text-white bg-gray-500">
+						<div className="h-8 text-lg font-bold text-gray-900 ">
+							Teacher's Editor
+						</div>
+					</div>
+					<CodeMirror
+						value={tcode}
+						extensions={[javascript({ jsx: true })]}
+						className="w-full bg-blue-200"
+						theme={vscodeDark}
+						readOnly={true}
+					/>
+				</div>
 			</div>
 		</>
 	);
