@@ -138,6 +138,9 @@ const handleCodePush = (code, socket) => {
 	socket.broadcast.to(classCode).emit("teacherCode", code);
 };
 
+const getClassCode = (socketId) => {
+	return socketToRoomMap.get(socketId);
+};
 module.exports = {
 	addStudentToClass,
 	createClassRoom,
@@ -145,4 +148,5 @@ module.exports = {
 	studentList,
 	askForReview,
 	handleCodePush,
+	getClassCode,
 };

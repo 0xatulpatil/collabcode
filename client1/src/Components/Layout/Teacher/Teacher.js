@@ -4,6 +4,7 @@ import { useLoaderData } from "react-router-dom";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
 import { vscodeDark } from "@uiw/codemirror-theme-vscode";
+import { Terminal } from "../../Terminal/Terminal";
 
 export async function loader({ params }) {
 	const classCode = params.classCode;
@@ -14,8 +15,9 @@ export const Teacher = () => {
 	const [studentMap, setStudentMap] = useState({});
 	const { classCode } = useLoaderData();
 
-	const [code, setCode] = useState("console.log('hello world!');");
-	const [studentCode, setStudentCode] = useState("hello there student");
+	const [code, setCode] = useState("console.log('hello from eval()')");
+	const [activeStudent, setActiveStudent] = useState("");
+	const [studentCode, setStudentCode] = useState("");
 	const codemirrorRef = useRef();
 
 	const getStudentList = (classCode) => {
@@ -75,16 +77,29 @@ export const Teacher = () => {
 	};
 
 	const handleStudentCard = (socketId) => {
+		console.log("event emmited for getting student code");
+		socket.emit("getStudentCode", socketId);
 		setStudentMap((studentMap) => {
 			let tMap = { ...studentMap };
 			tMap[socketId].review = false;
+			setActiveStudent(studentMap[socketId]);
 
 			return { ...tMap };
 		});
 	};
 
+	const handleStudentCode = (code) => {
+		console.log("received studentCode", code);
+		setStudentCode(code);
+	};
+
 	const handleCodePush = () => {
 		socket.emit("teacherCode", code);
+	};
+
+	const handleStudentCodePush = () => {
+		const studentSocketId = activeStudent.id;
+		socket.emit("codeChange", { studentSocketId, studentCode });
 	};
 
 	useEffect(() => {
@@ -100,12 +115,14 @@ export const Teacher = () => {
 		socket.on("studentList", (list) => handleStudentList(list));
 		socket.on("studentActivity", (stud) => handleStudentActivity(stud));
 		socket.on("reviewMe", (socketId) => handleReview(socketId));
+		socket.on("studentCode", (code) => handleStudentCode(code));
 
 		return () => {
 			socket.off("disconnect");
 			socket.off("studentList");
 			socket.off("studentActivity");
 			socket.off("reviewMe");
+			socket.off("studentCode");
 		};
 	}, []);
 
@@ -127,7 +144,7 @@ export const Teacher = () => {
 						return (
 							<div
 								key={student.socketId}
-								className="flex items-center justify-center w-full h-12 bg-gray-400 border-2"
+								className="flex items-center justify-center w-full h-12 bg-gray-400 border-2 cursor-pointer"
 								onClick={(e) => handleStudentCard(student.socketId)}
 							>
 								<div
@@ -141,8 +158,8 @@ export const Teacher = () => {
 					})}
 				</div>
 			</div>
-			<div className="w-full h-full">
-				<div className="flex w-full border border-blue-950">
+			<div className="flex flex-col w-full ">
+				<div className="flex w-full border border-blue-950 h-2/3">
 					<div className="flex flex-col w-full border-r-2 border-orange-800 code-editor">
 						<div className="text-center text-white bg-gray-500">
 							<div className="h-8 text-lg font-bold text-gray-900">
@@ -165,7 +182,7 @@ export const Teacher = () => {
 						<div className="flex flex-col w-full code-editor">
 							<div className="flex justify-around text-center text-white bg-gray-500">
 								<div className="h-8 text-lg font-bold text-gray-900 ">
-									Student's Editor
+									{activeStudent.name}'s Editor
 								</div>
 								<div
 									onClick={() => setStudentCode("")}
@@ -183,7 +200,7 @@ export const Teacher = () => {
 								theme={vscodeDark}
 							/>
 							<button
-								onClick={handleCodePush}
+								onClick={handleStudentCodePush}
 								className="font-bold bg-gray-300"
 							>
 								Push Code
@@ -192,6 +209,9 @@ export const Teacher = () => {
 					) : (
 						<></>
 					)}
+				</div>
+				<div className="overflow-auto h-1/3">
+					<Terminal code={code} />
 				</div>
 			</div>
 		</div>
