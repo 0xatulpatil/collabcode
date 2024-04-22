@@ -11,6 +11,7 @@ const {
 	studentList,
 	askForReview,
 	handleCodePush,
+	getClassCode,
 } = require("./socket.classrooms");
 
 const PORT = 5000;
@@ -103,6 +104,35 @@ io.on("connection", (socket) => {
 		const studList = studentList(classCode);
 		console.log(studList);
 		socket.broadcast.to(classCode).emit("studentList", studList);
+	});
+
+	socket.on("getStudentCode", (socketId) => {
+		console.log("event received: getStudentCode from", socket.id);
+		// const socketId = socket.id;
+		const classCode = getClassCode(socketId);
+		console.log("classcode from which to get code", classCode);
+		socket.broadcast.to(classCode).emit("getStudentCode", socketId);
+	});
+
+	socket.on("studentCode", (code) => {
+		console.log("received event: studentCode from", socket.id);
+		const socketId = socket.id;
+		const classCode = getClassCode(socketId);
+		socket.broadcast.to(classCode).emit("studentCode", code);
+	});
+	socket.on("codeChange", ({ studentSocketId, studentCode }) => {
+		const classCode = getClassCode(studentSocketId);
+		console.log(
+			"received codeChange event from ",
+			socket.id,
+			"to ",
+			studentSocketId,
+			"to classroom ",
+			classCode
+		);
+		socket.broadcast
+			.to(classCode)
+			.emit("codeChange", { studentSocketId, studentCode });
 	});
 });
 
