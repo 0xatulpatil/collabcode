@@ -42,17 +42,22 @@ export const Student = () => {
 		});
 
 		socket.on("getStudentCode", (socketId) => {
-			console.log("student code at the moment before sending", code);
 			if (socketId === socket.id) handleCodePush(code);
 		});
 
-		socket.on("codeChange", ({ socketId, code }) => {
-			if (socket.id === socketId) handleCodeChange(code);
+		socket.on("codeChange", ({ studentSocketId, studentCode }) => {
+			console.log(
+				"received code changes from server",
+				studentSocketId,
+				studentCode
+			);
+			if (socket.id === studentSocketId) handleCodeChange(studentCode);
 		});
 
 		return () => {
 			socket.off("teacherCode");
 			socket.off("getStudentCode");
+			socket.off("codeChange");
 		};
 	}, [code]);
 

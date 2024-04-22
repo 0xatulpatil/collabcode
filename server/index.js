@@ -120,9 +120,19 @@ io.on("connection", (socket) => {
 		const classCode = getClassCode(socketId);
 		socket.broadcast.to(classCode).emit("studentCode", code);
 	});
-	socket.on("codeChange", ({ socketId, code }) => {
-		const classCode = getClassCode(socketId);
-		socket.broadcast.to(classCode), emit("codeChange", { socketId, code });
+	socket.on("codeChange", ({ studentSocketId, studentCode }) => {
+		const classCode = getClassCode(studentSocketId);
+		console.log(
+			"received codeChange event from ",
+			socket.id,
+			"to ",
+			studentSocketId,
+			"to classroom ",
+			classCode
+		);
+		socket.broadcast
+			.to(classCode)
+			.emit("codeChange", { studentSocketId, studentCode });
 	});
 });
 

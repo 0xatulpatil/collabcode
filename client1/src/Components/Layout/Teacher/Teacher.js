@@ -15,7 +15,7 @@ export const Teacher = () => {
 	const [studentMap, setStudentMap] = useState({});
 	const { classCode } = useLoaderData();
 
-	const [code, setCode] = useState("console.log('hello from eval()')");
+	const [code, setCode] = useState("console.log('hello from teacher')");
 	const [activeStudent, setActiveStudent] = useState("");
 	const [studentCode, setStudentCode] = useState("");
 	const codemirrorRef = useRef();
@@ -98,7 +98,8 @@ export const Teacher = () => {
 	};
 
 	const handleStudentCodePush = () => {
-		const studentSocketId = activeStudent.id;
+		const studentSocketId = activeStudent.socketId;
+		console.log("emitting code changes to ", studentSocketId, studentCode);
 		socket.emit("codeChange", { studentSocketId, studentCode });
 	};
 
